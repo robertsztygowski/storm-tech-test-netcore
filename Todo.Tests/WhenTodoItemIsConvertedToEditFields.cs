@@ -15,7 +15,7 @@ namespace Todo.Tests
         public WhenTodoItemIsConvertedToEditFields()
         {
             var todoList = new TestTodoListBuilder(new IdentityUser("alice@example.com"), "shopping")
-                    .WithItem("bread", Importance.High)
+                    .WithItem("bread", Importance.High, 13)
                     .Build()
                 ;
 
@@ -40,6 +40,12 @@ namespace Todo.Tests
         public void EqualImportance()
         {
             Assert.Equal(srcTodoItem.Importance, resultFields.Importance);
+        }
+
+        [Fact]
+        public void EqualRank()
+        {
+            Assert.Equal(srcTodoItem.Rank, resultFields.Rank);
         }
     }
 }
