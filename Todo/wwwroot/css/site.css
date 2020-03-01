@@ -35,3 +35,7 @@ body {
         display: none;
     }
 }
+
+.float-right-span {
+    float: right;
+}

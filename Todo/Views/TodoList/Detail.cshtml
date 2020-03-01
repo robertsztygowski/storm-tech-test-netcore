@@ -17,6 +17,10 @@
             <a asp-action="Create" asp-controller="TodoItem" asp-route-todoListId="@Model.TodoListId">
                 <strong>Add New Item</strong>
             </a>
+
+            <span class="float-right-span">
+                <label><input id="isDoneCheckbox" type="checkbox" onchange="todoItemIsDoneCheckbox()" /> Hide done items</label>
+            </span>
         </li>
 
         @foreach (var item in Model.Items.OrderBy(x => x.Importance))
@@ -35,10 +39,8 @@
                     break;
             }
 
-            <li class="list-group-item @contextualClass">
-                
-                <div class="row">
-
+        <li name="todoItem" class="list-group-item @contextualClass" data-isdone="@Html.Raw(item.IsDone)">
+            <div class="row">
                 <div class="col-md-8">
                     <a asp-action="Edit" asp-controller="TodoItem" asp-route-todoItemId="@item.TodoItemId">
 
@@ -57,13 +59,12 @@
                     <small>
                         @item.ResponsibleParty.UserName
 
-                        <img src="https://www.gravatar.com/avatar/@Gravatar.GetHash(item.ResponsibleParty.Email)?s=30"/>
+                        <img src="https://www.gravatar.com/avatar/@Gravatar.GetHash(item.ResponsibleParty.Email)?s=30" />
 
                     </small>
                 </div>
-                </div>
-
-            </li>
+            </div>
+        </li>
         }
     </ul>
 </div>
