@@ -1,8 +1,11 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Todo.Data;
 using Todo.Data.Entities;
 using Todo.EntityModelMappers.TodoLists;
@@ -16,11 +19,13 @@ namespace Todo.Controllers
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IUserStore<IdentityUser> userStore;
+        private readonly IGravatarClient gravatarClient;
 
-        public TodoListController(ApplicationDbContext dbContext, IUserStore<IdentityUser> userStore)
+        public TodoListController(ApplicationDbContext dbContext, IUserStore<IdentityUser> userStore, IGravatarClient gravatarClient)
         {
             this.dbContext = dbContext;
             this.userStore = userStore;
+            this.gravatarClient = gravatarClient;
         }
 
         public IActionResult Index()
@@ -31,10 +36,29 @@ namespace Todo.Controllers
             return View(viewmodel);
         }
 
-        public IActionResult Detail(int todoListId)
+        public async Task<IActionResult> Detail(int todoListId)
         {
             var todoList = dbContext.SingleTodoList(todoListId);
             var viewmodel = TodoListDetailViewmodelFactory.Create(todoList);
+
+            try
+            {
+                foreach (var group in viewmodel.Items.GroupBy(x => new { x.ResponsibleParty.Email, x.ResponsibleParty.UserName }))
+                {
+                    var profile = await gravatarClient.GetGravatarProfile(group.Key.Email, group.Key.UserName, new CancellationToken());
+                    foreach (var item in group)
+                    {
+                        item.ResponsibleParty.UserName = profile.DisplayName;
+                        item.ResponsibleParty.ThumbnailUrl = profile.ThumbnailUrl;
+                        item.ResponsibleParty.HasGravatarProfile = profile.DoesExist;
+                    }
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("There is a connection problem with Gravatar API, please check your configuration");
+            }
+
             return View(viewmodel);
         }
 

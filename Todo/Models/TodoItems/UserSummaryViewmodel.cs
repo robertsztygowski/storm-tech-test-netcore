@@ -2,8 +2,10 @@
 {
     public class UserSummaryViewmodel
     {
-        public string UserName { get; }
-        public string Email { get; }
+        public string UserName { get; set; }
+        public string Email { get; set;  }
+        public string ThumbnailUrl { get; set; }
+        public bool HasGravatarProfile { get; set; }
 
         public UserSummaryViewmodel(string userName, string email)
         {

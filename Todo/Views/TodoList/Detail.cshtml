@@ -10,9 +10,14 @@
 <h2>@ViewData["Title"]</h2>
 
 <div class="col-md-6">
+    
+    <h4>Sorting</h4>
+    <div>
+        <button>Importance</button>
+        <button>Rank</button>
+    </div>
 
     <ul class="list-group">
-
         <li class="list-group-item">
             <a asp-action="Create" asp-controller="TodoItem" asp-route-todoListId="@Model.TodoListId">
                 <strong>Add New Item</strong>
@@ -63,8 +68,14 @@
                         <small>
                             @item.ResponsibleParty.UserName
 
-                            <img src="https://www.gravatar.com/avatar/@Gravatar.GetHash(item.ResponsibleParty.Email)?s=30"/>
-
+                            @if (item.ResponsibleParty.HasGravatarProfile)
+                            {
+                                <img src="@item.ResponsibleParty.ThumbnailUrl?s=30" />
+                            }
+                            else
+                            {
+                                <img src="/images/gravatar-default.jpg" width="30" height="30" />
+                            }
                         </small>
                     </div>
                 </div>
