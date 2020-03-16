@@ -3,6 +3,7 @@
 @using System.Threading
 @using Microsoft.AspNetCore.Identity
 @using Todo.Controllers
+@using Todo.Models.TodoItems
 @using Todo.Services
 
 @inject SignInManager<IdentityUser> SignInManager
@@ -17,20 +18,28 @@
                 <a asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
 
                     @{
-
                         var iu = await UserManager.GetUserAsync(User);
                         var emailAddress = await UserManager.GetEmailAsync(iu);
-                        var profile = await GravatarClient.GetGravatarProfile(emailAddress, emailAddress, new CancellationToken());
+                        GravatarProfile profile = new GravatarProfile();
+                        try
+                        {
+                            profile = await GravatarClient.GetGravatarProfile(emailAddress, emailAddress, CancellationToken.None);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                        if (profile.DoesExist)
+                        {
+                            <img src="@profile.ThumbnailUrl?s=30" />
+                        }
+                        else
+                        {
+                            <img src="/images/gravatar-default.jpg" width="30" height="30" />
+                        }
                     }
                     
-                    @if (profile.DoesExist)
-                    {
-                        <img src="@profile.ThumbnailUrl?s=30" />
-                    }
-                    else
-                    {
-                        <img src="/images/gravatar-default.jpg" width="30" height="30" />
-                    }
+                    
                     
                     @UserManager.GetUserName(User)
                 </a>
