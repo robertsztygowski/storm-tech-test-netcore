@@ -17,18 +17,31 @@ namespace Todo.Services
 
     public class GravatarClient : IGravatarClient
     {
+        private readonly IGravatarCache _gravatarCache;
         private readonly HttpClient _httpClient;
 
-        public GravatarClient(HttpClient httpClient)
+        public GravatarClient(HttpClient httpClient, IGravatarCache gravatarCache)
         {
             _httpClient = httpClient;
+            _gravatarCache = gravatarCache;
         }
 
         public async Task<GravatarProfile> GetGravatarProfile(string emailAddress, string userName, CancellationToken cancellationToken)
         {
+            GravatarProfile profile = new GravatarProfile()
+            {
+                DisplayName = userName,
+                DoesExist = false
+            };
+
             string emailHash = GetHash(emailAddress);
+            if (_gravatarCache.GravatarProfiles.ContainsKey(emailHash))
+            {
+                return _gravatarCache.GravatarProfiles[emailHash];
+            }
+
             HttpResponseMessage response = await _httpClient.GetAsync($"{emailHash}.json", cancellationToken);
-            
+
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
@@ -37,21 +50,19 @@ namespace Todo.Services
                     if (entry.GravatarProfiles.Any())
                     {
                         var result = entry.GravatarProfiles.First();
-                        return new GravatarProfile()
+                        profile = new GravatarProfile()
                         {
                             DisplayName = result.DisplayName,
                             DoesExist = true,
                             ThumbnailUrl = result.ThumbnailUrl
                         };
                     }
+
                     break;
             }
 
-            return new GravatarProfile()
-            {
-                DisplayName = userName,
-                DoesExist = false
-            };
+            _gravatarCache.GravatarProfiles.Add(emailHash, profile);
+            return profile;
         }
 
         private async Task<GravatarEntry> ParseResponse(HttpResponseMessage response)

@@ -45,6 +45,7 @@ namespace Todo
                 c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 c.Timeout = TimeSpan.FromSeconds(10);
             });
+            services.AddSingleton<IGravatarCache, GravatarCache>();
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

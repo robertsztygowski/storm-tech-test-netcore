@@ -45,7 +45,7 @@ namespace Todo.Controllers
             {
                 foreach (var group in viewmodel.Items.GroupBy(x => new { x.ResponsibleParty.Email, x.ResponsibleParty.UserName }))
                 {
-                    var profile = await gravatarClient.GetGravatarProfile(group.Key.Email, group.Key.UserName, new CancellationToken());
+                    var profile = await gravatarClient.GetGravatarProfile(group.Key.Email, group.Key.UserName, CancellationToken.None);
                     foreach (var item in group)
                     {
                         item.ResponsibleParty.UserName = profile.DisplayName;
